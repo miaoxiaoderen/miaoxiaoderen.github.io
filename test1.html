@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>微信浏览器检测</title>
+      <style>
+            * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+            }
+
+            body {
+                  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  color: #333;
+                  min-height: 100vh;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 20px;
+            }
+
+            .container {
+                  max-width: 600px;
+                  width: 100%;
+                  background: white;
+                  border-radius: 15px;
+                  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                  overflow: hidden;
+            }
+
+            .header {
+                  background: #07C160;
+                  color: white;
+                  padding: 20px;
+                  text-align: center;
+            }
+
+            .header h1 {
+                  font-size: 1.5rem;
+                  margin-bottom: 5px;
+            }
+
+            .content {
+                  padding: 30px;
+            }
+
+            .browser-icons {
+                  display: flex;
+                  justify-content: center;
+                  gap: 20px;
+                  margin: 25px 0;
+            }
+
+            .browser-icon {
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 12px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 28px;
+                  background: #f5f5f5;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .wechat-warning {
+                  background: #fff6f6;
+                  border: 1px solid #ffcdd2;
+                  border-radius: 10px;
+                  padding: 20px;
+                  margin: 20px 0;
+                  display: none;
+            }
+
+            .wechat-warning.show {
+                  display: block;
+                  animation: fadeIn 0.5s ease;
+            }
+
+            .warning-header {
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  margin-bottom: 10px;
+                  color: #d32f2f;
+            }
+
+            .warning-icon {
+                  font-size: 24px;
+            }
+
+            .steps {
+                  margin: 20px 0;
+                  padding-left: 20px;
+            }
+
+            .steps li {
+                  margin-bottom: 10px;
+                  line-height: 1.5;
+            }
+
+            .button {
+                  display: inline-block;
+                  background: #07C160;
+                  color: white;
+                  padding: 12px 25px;
+                  border-radius: 25px;
+                  text-decoration: none;
+                  font-weight: bold;
+                  margin-top: 10px;
+                  transition: all 0.3s ease;
+            }
+
+            .button:hover {
+                  background: #06a652;
+                  transform: translateY(-2px);
+            }
+
+            .normal-content {
+                  text-align: center;
+                  padding: 20px;
+            }
+
+            @keyframes fadeIn {
+                  from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                  }
+
+                  to {
+                        opacity: 1;
+                        transform: translateY(0);
+                  }
+            }
+
+            .copy-tip {
+                  background: #e3f2fd;
+                  border-radius: 8px;
+                  padding: 15px;
+                  margin-top: 15px;
+                  font-size: 14px;
+                  display: none;
+            }
+
+            .copy-tip.show {
+                  display: block;
+            }
+      </style>
+</head>
+
+<body>
+      <div class="container">
+            <div class="header">
+                  <h1>浏览器兼容性检测</h1>
+                  <p>为了更好的体验，建议使用系统浏览器</p>
+            </div>
+
+            <div class="content">
+                  <div class="browser-icons">
+                        <div class="browser-icon">🌐</div>
+                        <div class="browser-icon">🔍</div>
+                        <div class="browser-icon">🚀</div>
+                  </div>
+
+                  <div class="wechat-warning" id="wechatWarning">
+                        <div class="warning-header">
+                              <div class="warning-icon">⚠️</div>
+                              <h3>检测到微信内置浏览器</h3>
+                        </div>
+                        <p>微信内置浏览器可能影响功能正常使用，建议复制链接到系统浏览器打开：</p>
+
+                        <ol class="steps">
+                              <li>点击下方"复制链接"按钮</li>
+                              <li>打开手机系统浏览器（Safari/Chrome等）</li>
+                              <li>在地址栏粘贴链接并访问</li>
+                        </ol>
+
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                              <button class="button" onclick="copyUrl()">复制链接</button>
+                              <a href="#" class="button" id="openBrowserBtn" style="background: #2196F3;">在浏览器中打开</a>
+                        </div>
+
+                        <div class="copy-tip" id="copyTip">链接已复制到剪贴板！</div>
+                  </div>
+
+                  <div class="normal-content" id="normalContent">
+                        <h2>欢迎访问</h2>
+                        <p>当前在兼容的浏览器环境中，所有功能均可正常使用。</p>
+                        <p>如果您是从微信中打开此页面，系统会自动提示优化浏览体验。</p>
+                  </div>
+            </div>
+      </div>
+
+      <script>
+            // 检测是否为微信内置浏览器
+            function isWechatBrowser() {
+                  const ua = navigator.userAgent.toLowerCase();
+                  return ua.indexOf('micromessenger') !== -1;
+            }
+
+            // 复制当前链接到剪贴板
+            function copyUrl() {
+                  const url = window.location.href;
+                  const tempInput = document.createElement('input');
+                  tempInput.value = url;
+                  document.body.appendChild(tempInput);
+                  tempInput.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(tempInput);
+
+                  // 显示复制成功提示
+                  const copyTip = document.getElementById('copyTip');
+                  copyTip.classList.add('show');
+                  setTimeout(() => {
+                        copyTip.classList.remove('show');
+                  }, 3000);
+            }
+
+            // 尝试在外部浏览器打开（部分浏览器支持）
+            function openInBrowser() {
+                  // 通用方案：提示用户手动操作
+                  alert('请手动复制链接到系统浏览器中打开：\n\n' + window.location.href);
+
+                  // 尝试使用特定协议（部分Android设备支持）
+                  // window.location.href = 'googlechrome://' + window.location.href.replace(/^https?:\/\//, '');
+            }
+
+            // 页面加载完成后检测
+            document.addEventListener('DOMContentLoaded', function () {
+                  const wechatWarning = document.getElementById('wechatWarning');
+                  const normalContent = document.getElementById('normalContent');
+                  const openBrowserBtn = document.getElementById('openBrowserBtn');
+
+                  if (isWechatBrowser()) {
+                        // 在微信中打开，显示警告
+                        wechatWarning.classList.add('show');
+                        normalContent.style.display = 'none';
+
+                        // 设置浏览器打开按钮
+                        openBrowserBtn.addEventListener('click', function (e) {
+                              e.preventDefault();
+                              openInBrowser();
+                        });
+
+                        console.log('检测到微信内置浏览器，已显示提示');
+                  } else {
+                        // 不在微信中打开，显示正常内容
+                        wechatWarning.style.display = 'none';
+                        normalContent.style.display = 'block';
+
+                        console.log('当前不在微信内置浏览器中');
+                  }
+            });
+
+            // 添加用户代理信息显示（用于调试）
+            console.log('用户代理:', navigator.userAgent);
+            console.log('是否微信浏览器:', isWechatBrowser());
+      </script>
+</body>
+
+</html>
